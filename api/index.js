@@ -50,11 +50,16 @@ module.exports = async (req, res) => {
       const script = `
         <script>
           (function() {
-            function recieveMessage(e) {
-              window.opener.postMessage("authorization:${provider}:${status}:${content}", e.origin);
+            // 不等了！一進來直接主動向母視窗（後台）空投成功登入的暗號
+            if (window.opener) {
+              window.opener.postMessage("authorization:${provider}:${status}:${content}", "*");
+              // 丟完暗號後，給它 200 毫秒的緩衝時間確保母視窗收下，然後自己功成身退關閉
+              setTimeout(function() {
+                window.close();
+              }, 200);
+            } else {
+              document.body.innerHTML = "登入成功，請回到原視窗！若未自動關閉請手動關閉此分頁。";
             }
-            window.addEventListener("message", recieveMessage, false);
-            window.opener.postMessage("authorizing:${provider}", "*");
           })();
         </script>
       `;
