@@ -47,18 +47,17 @@ module.exports = async (req, res) => {
         status = 'success';
       }
 
-      // ✨ 精準檢查：確保所有引號、括號完美閉合的空投腳本
+      // 🚀 請把原本的 const script = `...` 替換成以下這段經典對話版：
       const script = `
         <script>
           (function() {
-            if (window.opener) {
-              window.opener.postMessage("authorization:${provider}:${status}:${content.replace(/"/g, '\\"')}", "*");
-              setTimeout(function() {
-                window.close();
-              }, 200);
-            } else {
-              document.body.innerHTML = "登入成功，請回到原視窗！";
+            function recieveMessage(e) {
+              // 當前台（母視窗）發送 handshake 訊號過來時，把暗號精準投遞過去
+              window.opener.postMessage("authorization:${provider}:${status}:${content.replace(/"/g, '\\"')}", e.origin);
             }
+            window.addEventListener("message", recieveMessage, false);
+            // 點火：告訴母視窗，我準備好要傳輸了
+            window.opener.postMessage("authorizing:${provider}", "*");
           })();
         </script>
       `;
